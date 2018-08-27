@@ -1,0 +1,14 @@
+<view class="citiesWrapper">
+  <view class='searchContainer'>
+    <view class="inner">
+      <image class='icon' src='/img/search_grey.png'></image>
+      <input value='{{inputContext}}' placeholder='搜索城市' maxlength='20' confirm-type='搜索' bindconfirm='handleInputConfirm' ></input>
+    </view>
+    <text class='clearable' catchtap='handleClear'>清空</text>
+  </view>
+  <view class="cityUnit" wx:for="{{cities}}" wx:for-index="cur" wx:for-item="content" wx:key="{{index}}">
+    <view class="unitType">{{cur}}</view>
+    <view class="unitName" wx:for="{{content}}" wx:key="{{index}}" bindtap="handleClickCity" data-name="{{item.name}}">{{item.name}}</view>
+  </view>
+  <view class="noResults" wx:if="{{!inputFlag}}">没有搜索到相关内容</view>
+</view>

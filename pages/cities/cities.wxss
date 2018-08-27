@@ -1,0 +1,63 @@
+.citiesWrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f2f2f2;
+}
+.citiesWrapper .searchContainer {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding:30rpx;
+  background-color:#fff;
+}
+.citiesWrapper .searchContainer .inner {
+  background: #efefef;
+  font-size: 30rpx;
+  padding: 16rpx 0 16rpx 20rpx;
+  box-sizing: border-box;
+  border-radius: 8rpx;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.citiesWrapper .searchContainer .inner input {
+  background: #efefef;
+  font-size: 30rpx;
+  height: 38rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+.citiesWrapper .searchContainer .inner .icon {
+  width: 28rpx;
+  height: 28rpx;
+  margin-right: 10rpx;
+}
+.citiesWrapper .searchContainer .clearable {
+  font-size: 30rpx;
+  display: inline-block;
+  text-align:right;
+  color: #666;
+  width: 2.5em;
+}
+.citiesWrapper .cityUnit {
+  font-size: 32rpx;
+  color: #333;
+  background: #fff;
+}
+.citiesWrapper .cityUnit .unitType {
+  padding-left:30rpx;
+  background: #f2f2f2;
+}
+.citiesWrapper .cityUnit .unitName {
+  height: 104rpx;
+  line-height:104rpx;
+  padding-left:30rpx;
+  border-bottom: 1rpx solid #efefef;
+}
+.citiesWrapper .noResults {
+  text-align: center;
+  margin-top: 100rpx;
+  font-size: 30rpx;
+  color: #666;
+}

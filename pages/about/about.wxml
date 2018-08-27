@@ -1,0 +1,58 @@
+<view class='aboutWrapper'>
+  <swiper indicator-color='#666666' indicator-active-color='#40a7e7' autoplay="true" circular="true" interval="5000" duration="300" previous-margin="0px" next-margin="0px" style='height:{{swiperHeight}}'>
+    <block wx:for="{{bannerImgList}}" wx:key="{{index}}">
+      <swiper-item>
+        <view class='swiper_item' data-index='{{index}}' catchtap='handlePreview'>
+          <image src='{{item}}'></image>
+          <view class='name'>Quiet Weather</view>
+        </view>
+      </swiper-item>
+    </block>
+  </swiper>
+  <view class='feedback contentWrapper'>
+    <view class='title'>建议 & 意见反馈</view>
+    <view class='body' catchtap='handleCopyMessage' data-title='GitHub' data-content='{{github}}'>
+      <image src='/img/github.png'></image>
+      <view class='text'>通过 GitHub 反馈</view>
+    </view>
+    <view class='body' catchtap='handleCopyMessage' data-title='邮箱' data-content='{{email}}'>
+      <image src='/img/email.png'></image>
+      <view class='text'>通过 Email 反馈</view>
+    </view>
+    <view class='body' catchtap='handleCopyMessage' data-title='QQ' data-content='{{qq}}'>
+      <image src='/img/qq.png'></image>
+      <view class='text'>通过 QQ 反馈</view>
+    </view>
+    <view class='body'>
+      <image src='/img/wechat.png'></image>
+      <view class='text'>微信快速联系</view>
+      <button open-type="contact" class='quickContact'></button>
+    </view>
+  </view>
+  <view class='thanks contentWrapper'>
+    <view class='title'>鸣谢</view>
+    <view class='body'>
+      <image src='/img/location_grey.png'></image>
+      <view class='text' catchtap='handleCopyMessage' data-title='adress' data-content="{{articleAdress}}">开源文章地址</view>
+    </view>
+    <view class='body'>
+      <image src='/img/weather.png'></image>
+      <view class='text'>开源作者{{autorName}}</view>
+    </view>
+    <view class='body'>
+      <image src='/img/location_grey.png'></image>
+      <view class='text'>地理编码：百度地图开放平台</view>
+    </view>
+    <view class='body'>
+      <image src='/img/weather.png'></image>
+      <view class='text'>天气数据来源：百度地图开放平台</view>
+    </view>
+  </view>
+  <view class='attention contentWrapper'>
+    <view class='title'>注意事项</view>
+    <view>
+      <view class='text'>本程序的迭代开发,只用做个人学习使用且已征得作者同意(设计思路和UI归作者本人所有)</view>
+      <view class='text'>本程序的数据均存储在本地,没有账号体系,没有数据同步功能,若清空微信相关数据可能会造成数据丢失</view>
+    </view>
+  </view>
+</view>

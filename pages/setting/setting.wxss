@@ -1,0 +1,47 @@
+.settingWrapper {
+  font-size: 28rpx;
+  color: #666;
+  padding: 30rpx 40rpx;
+}
+.settingWrapper .settingContainer .title {
+  font-size: 32rpx;
+  color: #40a7e7;
+  margin: 26rpx 0;
+}
+.settingWrapper .settingContainer .funcArea{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100rpx; 
+}
+.settingWrapper .settingContainer .funcArea .left{
+  flex:1;
+  display: flex;
+  flex-direction: column;
+  align-items:flex-start;
+  justify-content:center;
+  height: 100rpx; 
+  padding-left:20rpx;
+  
+}
+.settingWrapper .settingContainer .funcArea .left .tip {
+  font-size: 22rpx;
+  color: #999;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+.settingWrapper .settingContainer .funcArea .left slider {
+  width: 100%;
+  /* 抵消"溢出"的滑块宽度->slider组件block-size属性/2 */
+  margin-left:0rpx;
+}
+
+.more {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+.wx-switch-input{width:84rpx !important;height:43rpx !important;}
+.wx-switch-input::before{width:82rpx !important;height: 38rpx !important;}
+.wx-switch-input::after{width: 38rpx !important;height: 38rpx !important;}

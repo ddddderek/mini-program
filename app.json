@@ -1,0 +1,15 @@
+{
+  "pages":[
+    "pages/index/index",
+    "pages/cities/cities",
+    "pages/setting/setting",
+    "pages/systeminfo/systeminfo",
+    "pages/about/about"
+  ],
+  "window":{
+    "backgroundTextStyle":"light",
+    "navigationBarBackgroundColor": "#40a7e7",
+    "navigationBarTitleText": "derek weather",
+    "navigationBarTextStyle":"white"
+  }
+}

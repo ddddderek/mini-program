@@ -1,0 +1,51 @@
+<view class="weatherWrapper">
+  <image class='bcg' wx:if='{{bcgUrl}}' src='{{bcgUrl}}' mode='aspectFill'></image>
+  <view class="bcg" wx:else style='background: {{bcgColor}}'></view>
+  <view class="searchCityWrapper">
+    <view class="searchCityContainer" wx:if="{{!setting.search}}">
+      <image src="/img/search.png"></image>
+      <input value="{{searchContext}}" placeholder-class="searchPlaceholderStyle" placeholder="查询其他城市" confirm-type="search" maxlength='20' bindconfirm="handleCommit"/>
+    </view>   
+  </view>
+  <view class="weatherContainer" style='margin-top: {{setting.search ? 20 : 60}}px'>
+    <view class="curCity">
+      <view class="pos">{{weatherData.curCity || '定位中'}}</view>
+      <text class="time">{{weatherData.now}}更新</text>
+    </view>
+    <view class="curCondition">
+      <view class="temperature">{{weatherData.curTemperature || '--'}}<text style='font-size:90rpx'>°             </text></view>
+      <view class="weatherDesc">{{weatherData.weatherDesc}}</view>
+      <view class="pm25" wx:if="{{weatherData.pm25.quality && weatherData.pm25.pm25}}">
+        <text>{{weatherData.pm25.quality}}  {{weatherData.pm25.pm25}}</text>
+      </view>
+    </view>
+    <view class="predict" wx:if="{{weatherData.originalData.results[0].weather_data.length}}">
+      <view class='predict_item' wx:for='{{weatherData.originalData.results[0].weather_data}}' wx:key='{{index}}'>
+        <view class='date common'>{{index === 0 ? '今天' : item.date}}</view>
+        <view class='temperature common'>{{item.temperature}}</view>
+        <!-- <image class='common' src='{{item.dayPictureUrl}}' mode='widthFix'></image> -->
+        <!-- <image class='common' src='{{item.nightPictureUrl}}' mode='widthFix'></image> -->
+        <view class='weather common'>{{item.weather}}</view>
+        <view class='wind common'>{{item.wind}}</view>
+      </view>
+    </view>
+    <view class="lifeMark" wx:if="{{!setting.life && weatherData.originalData.results[0].index.length}}">
+      <view class='lifeMark_item' wx:for='{{weatherData.originalData.results[0].index}}' wx:key='{{index}}'>
+        <image class='icon' src='{{icons[index]}}'></image>
+        <view class="right">
+          <view>{{item.tipt}} {{item.zs}}</view>
+          <view>{{item.des}}</view>
+        </view>
+      </view>
+    </view>
+    <view class='copy'>
+      <view>数据来源 百度地图开放平台</view>
+    </view>
+  </view>
+  <view class='menus'>
+    <image src="/img/location.png" animation="{{animationCity}}" data-param="{{1}}" class="menu" bindtap="handleSecMenu"  style='top:{{pos.top}}px;left:{{pos.left}}px;'></image>
+    <image src="/img/setting.png" animation="{{animationSetting}}" data-param="{{2}}" class="menu" bindtap="handleSecMenu"  style='top:{{pos.top}}px;left:{{pos.left}}px;'></image>
+    <image src="/img/info.png" animation="{{animationSystem}}" data-param="{{3}}" class="menu" bindtap="handleSecMenu"  style='top:{{pos.top}}px;left:{{pos.left}}px;'></image>
+    <image src="/img/menu.png" animation="{{animationMain}}" class="menu main" bindtap="handleMainMenu" style='top:{{pos.top}}px;left:{{pos.left}}px;'></image>
+  </view>
+</view>
