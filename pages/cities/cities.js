@@ -1,11 +1,13 @@
-var util = require('../../utils/util.js'); 
 
 //获取应用实例
 const app = getApp()
 
+//工具函数
+var util = require('../../utils/util.js'); 
+
 Page({
   data: {
-    //搜索取悦
+    //搜索区域
     //绑定数据
     inputContext:'',
     //标志位

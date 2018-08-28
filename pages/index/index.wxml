@@ -1,18 +1,24 @@
 <view class="weatherWrapper">
   <image class='bcg' wx:if='{{bcgUrl}}' src='{{bcgUrl}}' mode='aspectFill'></image>
-  <view class="bcg" wx:else style='background: {{bcgColor}}'></view>
+  <view class="bcg" wx:if='{{!bcgUrl}}' style='background: {{bcgColor}}'></view>
   <view class="searchCityWrapper">
-    <view class="searchCityContainer" wx:if="{{!setting.search}}">
+    <view class="searchCityContainer" wx:if="{{!setting.search && !isChosedFlag}}">
       <image src="/img/search.png"></image>
       <input value="{{searchContext}}" placeholder-class="searchPlaceholderStyle" placeholder="查询其他城市" confirm-type="search" maxlength='20' bindconfirm="handleCommit"/>
     </view>   
   </view>
-  <view class="weatherContainer" style='margin-top: {{setting.search ? 20 : 60}}px'>
+  <view class="weatherContainer" wx:if='{{!isChosedFlag}}' style='margin-top: {{setting.search ? 20 : 60}}px'>
+    <view class='avatarInfoWrapper' catchtap='handleChangeBcgImgArea' data-show="{{true}}">
+      <open-data class='avatar' type='userAvatarUrl'></open-data>
+      <open-data class='name' type='userNickName'></open-data>
+      <image class='downArrow' src='/img/down-arrow.png'></image>
+    </view>
     <view class="curCity">
       <view class="pos">{{weatherData.curCity || '定位中'}}</view>
       <text class="time">{{weatherData.now}}更新</text>
     </view>
     <view class="curCondition">
+      <view class='message'>{{message}}</view>
       <view class="temperature">{{weatherData.curTemperature || '--'}}<text style='font-size:90rpx'>°             </text></view>
       <view class="weatherDesc">{{weatherData.weatherDesc}}</view>
       <view class="pm25" wx:if="{{weatherData.pm25.quality && weatherData.pm25.pm25}}">
@@ -42,10 +48,23 @@
       <view>数据来源 百度地图开放平台</view>
     </view>
   </view>
-  <view class='menus'>
+  <view class='menus' wx:if='{{!isChosedFlag}}'>
     <image src="/img/location.png" animation="{{animationCity}}" data-param="{{1}}" class="menu" bindtap="handleSecMenu"  style='top:{{pos.top}}px;left:{{pos.left}}px;'></image>
     <image src="/img/setting.png" animation="{{animationSetting}}" data-param="{{2}}" class="menu" bindtap="handleSecMenu"  style='top:{{pos.top}}px;left:{{pos.left}}px;'></image>
     <image src="/img/info.png" animation="{{animationSystem}}" data-param="{{3}}" class="menu" bindtap="handleSecMenu"  style='top:{{pos.top}}px;left:{{pos.left}}px;'></image>
     <image src="/img/menu.png" animation="{{animationMain}}" class="menu main" bindtap="handleMainMenu" style='top:{{pos.top}}px;left:{{pos.left}}px;'></image>
+  </view>
+  <view class='chooseBcg' wx:if='{{isChosedFlag}}'>
+    <view class='top'>
+      <view class='title'>更换背景</view>
+      <view class='bcgs'>
+        <view class='border {{bcgImgIndex === index ? "active" : ""}}' wx:for='{{bcgImgList}}' wx:key='{{index}}'>
+          <image src='{{item.src}}' catchtap='handleChooseBcg' data-index='{{index}}' data-src='{{item.src}}'></image>
+        </view>
+      </view>
+    </view>
+    <view class='close' catchtap='handleChangeBcgImgArea' data-show="{{false}}">
+      <image src='/img/up-arrow.png'></image>
+    </view>
   </view>
 </view>

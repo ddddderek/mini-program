@@ -1,4 +1,3 @@
-//index.js
 var bmap = require('../../libs/bmap-wx.js'); 
 var moment = require('../../libs/moment.js'); 
 var util = require('../../utils/util.js'); 
@@ -11,17 +10,47 @@ Page({
   data: {
     //页面配置
     setting:{},
-    //背景
-    //图片地址
-    bcgUrl:'',
-    //颜色
-    bcgColor: '#40a7e7',
 
     //搜索区域
     //是否显示
-    isShowSearchArea:false,
+    isShowSearchArea: false,
     //当前搜索城市-input占位
-    searchContext:'',
+    searchContext: '',
+
+    //背景
+    //图片地址
+    bcgUrl:'/img/1.jpg',
+    //颜色
+    bcgColor: '#40a7e7',
+    //选择主题标志位
+    isChosedFlag:false,
+    //主题列表
+    bcgImgList: [
+      {
+        src: '/img/1.jpg',
+        navbarColor: '#2467ab'
+      },
+      {
+        src: '/img/2.jpg',
+        navbarColor: '#faea9d'
+      },
+      {
+        src: '/img/3.jpg',
+        navbarColor: '#505050'
+      },
+      {
+        src: '/img/4.jpg',
+        navbarColor: '#bacbe9'
+      },
+      {
+        src: '/img/5.jpg',
+        navbarColor: '#2445ae'
+      },
+      {
+        src: '/img/6.jpg',
+        navbarColor: '#fff1ab'
+      },
+    ],
 
     //生活推荐图片
     icons: ['/img/clothing.png', '/img/carwashing.png', '/img/pill.png', '/img/running.png', '/img/sun.png'],
@@ -44,13 +73,16 @@ Page({
     animationSystem:{}
   },
   onShow: function () {
-    this.initBcg()
-    this.initSetting()
-
+    // this.initBcg()
+    //初始化页面构造
+    this.handleInitSetting()
+    //初始化主题
+    this.handleSetBcgImg()
+    //初始化天气数据
     if (!this.data.isSelectCityBack){
-      this.initData()
+      this.handleInitData()
     }else{
-      //先搜索城市,初始化数据
+      //从选择城市页面返回
       //清空标志位
       this.handleCitySearch(this.data.selectedCityName)
       this.setData({
@@ -58,15 +90,34 @@ Page({
         selectedCityName: '',
       })
     }
-    
+    //初始化tips
+    this.setData({
+      message: util.tips()
+    })
   },
+  //页面分享函数
+  onShareAppMessage(res) {
+    return {
+      title: 'derek Weather',
+      success() { },
+      fail(err) {
+        let errMsg = e.errMsg
+        let msg = errMsg.indexOf('cancel') !== -1 ? msg = '取消分享' : '分享失败'
+        wx.showToast({
+          title: msg,
+          icon: 'none'
+        })
+      }
+    }
+  },
+  //下拉刷新钩子函数
   onPullDownRefresh() {
     let _this = this
     wx.getStorage({
       key:'location',
       success: function (res) {
         let location = res.data
-        _this.initData(location)
+        _this.handleInitData(location)
       },
       fail:function (res) {
           wx.showToast({
@@ -76,12 +127,81 @@ Page({
       }
     }) 
   },
-  initData(location){
+  //处理页面构造函数
+  handleInitSetting(cb) {
+    let that = this
+    wx.getStorage({
+      key: 'setting',
+      success: function (res) {
+        let setting = res.data
+        that.setData({
+          setting,
+        })
+        cb && cb(setting)
+      },
+      fail: function () {
+        that.setData({
+          setting: {},
+        })
+      },
+    })
+  },
+  //设置导航栏背景色
+  handleSetNavigationBarColor(color) {
+    let bcgColor = color || this.data.bcgColor
+    wx.setNavigationBarColor({
+      frontColor: '#ffffff',
+      backgroundColor: bcgColor,
+    })
+  },
+  //处理主题函数
+  handleSetBcgImg(index) {
+    if (index) {
+      this.setData({
+        bcgImgIndex: index,
+        bcgUrl: this.data.bcgImgList[index].src,
+        bcgColor: this.data.bcgImgList[index].navbarColor,
+      })
+      this.handleSetNavigationBarColor()
+      return
+    }
+    wx.getStorage({
+      key: 'bcgImgIndex',
+      success: (res) => {
+        let bcgImgIndex = res.data
+        this.setData({
+          bcgImgIndex,
+          bcgUrl: this.data.bcgImgList[bcgImgIndex].src,
+          bcgColor: this.data.bcgImgList[bcgImgIndex].navbarColor,
+        })
+        this.handleSetNavigationBarColor()
+      },
+      fail: () => {
+        this.setData({
+          bcgImgIndex: 0,
+          bcgUrl: this.data.bcgImgList[0].src,
+          bcgColor: this.data.bcgImgList[0].navbarColor,
+        })
+        this.handleSetNavigationBarColor()
+      },
+    })
+  },
+  //切换注意按钮函数
+  handleChooseBcg(e) {
+    let data = e.currentTarget.dataset
+    let src = data.src
+    let index = data.index
+    wx.setStorage({
+      key: 'bcgImgIndex',
+      data: index,
+    })
+    this.handleSetBcgImg(index)
+  },
+  //处理天气数据函数
+  handleInitData(location){
     let _this = this
-
     let weatherSuccess = function(data) {
       wx.stopPullDownRefresh()
-
       let now = Date.now()
       data.now = moment(now).format('MM-DD hh:mm')
       data.curCity = data.currentWeather[0].currentCity
@@ -135,69 +255,50 @@ Page({
       success:weatherSuccess,
     })
   },
-  initBcg(){
+  // initBcg(){
+  //   let _this = this
+  //   wx.getSavedFileList({
+  //     success: function (res) {
+  //       if (res.fileList.length > 0) {
+  //         _this.setData({
+  //           bcgUrl: res.fileList[0].filePath
+  //         })
+  //       }else{
+  //         _this.setData({
+  //           bcgUrl: ''
+  //         })
+  //       }
+  //     }
+  //   })
+  // },
+  //根据地名查询经纬度
+  handleCitySearch(val) {
     let _this = this
-    wx.getSavedFileList({
-      success: function (res) {
-        if (res.fileList.length > 0) {
-          _this.setData({
-            bcgUrl: res.fileList[0].filePath
-          })
-        }else{
-          _this.setData({
-            bcgUrl: ''
-          })
-        }
-      }
-    })
-
-  },
-  initSetting(cb) {
-    let that = this
-    wx.getStorage({
-      key: 'setting',
-      success: function (res) {
-        let setting = res.data
-        that.setData({
-          setting,
-        })
-        cb && cb(setting)
-      },
-      fail: function () {
-        that.setData({
-          setting: {},
-        })
-      },
-    })
-  },
-  handleCommit(ev){
-    let tarCityName = ev.detail.value.trim()
-    this.handleCitySearch(tarCityName)
-  },
-  handleCitySearch(val){
-    let _this = this
-    if (val){
+    if (val) {
       wx.request({
         url: geocoderUrl(val),
-        success: function (res){
+        success: function (res) {
           let data = res.data
-          if (data.status === 0 ) {
-            _this.initData(`${data.result.location.lng},${data.result.location.lat}`)
+          if (data.status === 0) {
+            _this.handleInitData(`${data.result.location.lng},${data.result.location.lat}`)
             //成功
-          }else {
+          } else {
             wx.showToast({
               title: data.msg || '网络不给力，请稍后再试',
               icon: 'none',
             })
           }
         },
-        fail: function (res){
+        fail: function (res) {
           wx.showToast({
             title: data.msg || '网络不给力，请稍后再试',
             icon: 'none',
           })
         },
-        complete:function(res){
+        complete: function (res) {
+          //初始化
+          //清空搜索数据
+          //页面滚动到顶部
           _this.setData({
             searchContext: '',
           })
@@ -209,19 +310,12 @@ Page({
       })
     }
   },
-  handleMainMenu(e){
-    this.data.hasStep ? this.handleAnimateOn() : this.handleAnimateOff()
+  //搜索城市确认钩子函数
+  handleCommit(ev){
+    let tarCityName = ev.detail.value.trim()
+    this.handleCitySearch(tarCityName)
   },
-  handleSecMenu(e){
-    let flag = e.target.dataset.param
-    let url = flag === 1 ? '/pages/cities/cities' : (flag === 2 ? '/pages/setting/setting' :'/pages/about/about') 
-      wx.navigateTo({
-        url: url
-      })
-    //关闭动画
-    this.handleAnimateOff()
-  },
-  handleAnimateOn(){ 
+  handleAnimateOn() {
     let animationMain = wx.createAnimation({
       duration: 200,
       timingFunction: 'ease-in-out'
@@ -252,6 +346,8 @@ Page({
       hasStep: false
     })
   },
+
+  //动画函数
   handleAnimateOff() {
     let animationMain = wx.createAnimation({
       duration: 200,
@@ -283,29 +379,24 @@ Page({
       hasStep: true
     })
   },
-  handleMainMenuEnd(e) {
-    let clientX = e.changedTouches[0].clientX
-    if (clientX > (globalData.systeminfo.windowWidth-40)/2){
-      clientX = globalData.systeminfo.windowWidth - 40
-    }else{
-      clientX = 0
-    }
+  handleChangeBcgImgArea(e) {
+    let flag = e.currentTarget.dataset.show
     this.setData({
-      pos: { top: this.data.pos.top, left: clientX }
+      isChosedFlag: flag,
     })
   },
-  onShareAppMessage(res){
-    return {
-      title: 'derek Weather',
-      success(){},
-      fail(err){
-        let errMsg = e.errMsg
-        let msg = errMsg.indexOf('cancel') !== -1 ? msg = '取消分享' : '分享失败'
-        wx.showToast({
-          title: msg,
-          icon: 'none'
-        })
-      }
-    }
-  }
+  //点击主菜单钩子函数
+  handleMainMenu(e){
+    this.data.hasStep ? this.handleAnimateOn() : this.handleAnimateOff()
+  },
+  //点击子菜单钩子函数
+  handleSecMenu(e){
+    let flag = e.target.dataset.param
+    let url = flag === 1 ? '/pages/cities/cities' : (flag === 2 ? '/pages/setting/setting' :'/pages/about/about') 
+      wx.navigateTo({
+        url: url
+      })
+    //关闭动画
+    this.handleAnimateOff()
+  },
 })

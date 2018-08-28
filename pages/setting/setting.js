@@ -146,7 +146,7 @@ Page({
       }
     })
   },
-  screenBrightnessChanging(e){
+  handleScreenBrightnessChanging(e){
     let val = e.detail.value
     let _this = this
     wx.setScreenBrightness({

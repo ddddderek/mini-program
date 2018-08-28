@@ -4,7 +4,7 @@
 		"ignore": []
 	},
 	"setting": {
-		"urlCheck": true,
+		"urlCheck": false,
 		"es6": true,
 		"postcss": true,
 		"minified": true,
@@ -13,7 +13,7 @@
 	"compileType": "miniprogram",
 	"libVersion": "2.2.1",
 	"appid": "wxe330335d36b45e39",
-	"projectname": "Demo",
+	"projectname": "derek%20weather",
 	"isGameTourist": false,
 	"condition": {
 		"search": {
