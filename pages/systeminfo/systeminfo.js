@@ -1,3 +1,6 @@
+const app = getApp()
+const globalData = app.globalData
+
 Page({
   data: {
     systeminfoObj: {},
@@ -62,7 +65,7 @@ Page({
   },
   onShow () {
     this.setData({
-      systeminfoObj: getApp().globalData.systeminfo
+      systeminfoObj: globalData.systeminfo
     })
   },
 })

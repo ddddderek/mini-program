@@ -4,17 +4,21 @@ Page({
   data: {
     //页面配置项目
     setting:{},
-    keepscreenon:false,
     enableUpdate: true,
+    screenBrightness: '获取中',
+    keepscreenon: false,
     SDKVersion:''
   },
   onShow: function () { 
     let _this = this
+    //初始化强制更新
+    this.isForceUpdate()
+    //初始化屏幕亮度
+    this.handleGetScreenBrightness()
+    //初始化屏幕是否保持常亮
     this.setData({
       keepscreenon: globalData.keepscreenon,
-    })
-    this.isForceUpdate()
-    this.getScreenBrightness()
+    }) 
     wx.getStorage({
       key: 'setting',
       success: function (res) {
@@ -30,64 +34,39 @@ Page({
       },
     })
   },
-  handleChangeBcg(e){
-    let _this = this
-    wx.chooseImage({
-      count: 1,
-      success(res) {
-        _this.handleClearBcgs(() => {
-          wx.saveFile({
-            tempFilePath: res.tempFilePaths[0],
-            success: function () {
-              wx.navigateBack({})
-            }
-          })
-        })
-      }
-    })
-  },
-  handleRecoverBcg(e){
-    this.handleClearBcgs(() => {
-      wx.showToast({
-        title: '恢复默认背景成功',
-        icon:'none'
+  //强制更新判断函数
+  isForceUpdate() {
+    let SDKVersion = globalData.systeminfo.SDKVersion
+    SDKVersion = SDKVersion.replace(/\./g, '')
+    if (parseInt(SDKVersion) >= 190) {
+      this.setData({
+        SDKVersion,
+        enableUpdate: true,
       })
-      setTimeout(()=>{
-        wx.navigateBack({})
-      },1000)
-    })
+    } else {
+      this.setData({
+        SDKVersion,
+        enableUpdate: false,
+      })
+    }
   },
-  //处理本地缓存照片
-  handleClearBcgs(callback){
-    wx.getSavedFileList({
-      success(res) {
-        let files = res.fileList
-        let len = files.length
-        if (len && len != 0){
-          //需要清除
-          for (let i = 0; i < len; i++) {
-            wx.removeSavedFile({
-              filePath: files[i].filePath,
-              complete() {
-                if(i === len - 1){
-                  callback()
-                }
-              }
-            })
-          }
-        }else{
-          //直接处理本次
-          callback()
-        }
+  //获取屏幕亮度
+  handleGetScreenBrightness() {
+    let that = this
+    wx.getScreenBrightness({
+      success: function (res) {
+        that.setData({
+          screenBrightness: Number(res.value * 100).toFixed(0),
+        })
       },
-      fail: function () {
-        wx.showToast({
-          title: '出错了,请稍后再试',
-          icon: 'none',
+      fail: function (res) {
+        that.setData({
+          screenBrightness: '获取失败',
         })
       },
     })
   },
+  //switch组件change事件
   handleSwitchChange(e){
     let flag = e.target.dataset.param
     let value = e.detail.value
@@ -117,8 +96,8 @@ Page({
       data: setting,
     })
   },
+  //是否支持NFC功能
   handleGetHCEState(){
-    console.log(111)
     wx.showLoading({
       title:'正在检测...'
     })
@@ -146,48 +125,20 @@ Page({
       }
     })
   },
+  //调节屏幕亮度函数
   handleScreenBrightnessChanging(e){
     let val = e.detail.value
-    let _this = this
+    console.log(val)
     wx.setScreenBrightness({
       value: val / 100,
-      success: function (res) {
-        _this.setData({
+      success: (res) => {
+        this.setData({
           screenBrightness: val,
         })
       },
     })
   },
-  isForceUpdate(){
-    let SDKVersion = globalData.systeminfo.SDKVersion
-    SDKVersion = SDKVersion.replace(/\./g, '')
-    if (parseInt(SDKVersion) >= 190){
-      this.setData({
-        SDKVersion,
-        enableUpdate: true,
-      })
-    }else{
-      this.setData({
-        SDKVersion,
-        enableUpdate: false,
-      })
-    }
-  },
-  getScreenBrightness(){
-    let that = this
-    wx.getScreenBrightness({
-      success: function (res) {
-        that.setData({
-          screenBrightness: Number(res.value * 100).toFixed(0),
-        })
-      },
-      fail: function (res) {
-        that.setData({
-          screenBrightness: '获取失败',
-        })
-      },
-    })
-  },
+  //是否保持屏幕常亮
   setKeepScreenOn(value) {
     let that = this
     wx.setKeepScreenOn({
@@ -199,9 +150,70 @@ Page({
       },
     })
   },
+  //跳转系统信息页面函数
   handleGetsysteminfo() {
     wx.navigateTo({
       url: '/pages/systeminfo/systeminfo',
     })
   },
+  // //选择背景图
+  // handleChangeBcg(e) {
+  //   let _this = this
+  //   wx.chooseImage({
+  //     count: 1,
+  //     success(res) {
+  //       _this.handleClearBcgs(() => {
+  //         wx.saveFile({
+  //           tempFilePath: res.tempFilePaths[0],
+  //           success: function () {
+  //             wx.navigateBack({})
+  //           }
+  //         })
+  //       })
+  //     }
+  //   })
+  // },
+  // //清楚背景
+  // handleRecoverBcg(e) {
+  //   this.handleClearBcgs(() => {
+  //     wx.showToast({
+  //       title: '恢复默认背景成功',
+  //       icon: 'none'
+  //     })
+  //     setTimeout(() => {
+  //       wx.navigateBack({})
+  //     }, 1000)
+  //   })
+  // },
+  // //处理本地缓存照片
+  // handleClearBcgs(callback) {
+  //   wx.getSavedFileList({
+  //     success(res) {
+  //       let files = res.fileList
+  //       let len = files.length
+  //       if (len && len != 0) {
+  //         //需要清除
+  //         for (let i = 0; i < len; i++) {
+  //           wx.removeSavedFile({
+  //             filePath: files[i].filePath,
+  //             complete() {
+  //               if (i === len - 1) {
+  //                 callback()
+  //               }
+  //             }
+  //           })
+  //         }
+  //       } else {
+  //         //直接处理本次
+  //         callback()
+  //       }
+  //     },
+  //     fail: function () {
+  //       wx.showToast({
+  //         title: '出错了,请稍后再试',
+  //         icon: 'none',
+  //       })
+  //     },
+  //   })
+  // },
 })

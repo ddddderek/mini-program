@@ -21,7 +21,7 @@ Page({
     //图片地址
     bcgUrl:'/img/1.jpg',
     //颜色
-    bcgColor: '#40a7e7',
+    bcgColor: '#2467ab',
     //选择主题标志位
     isChosedFlag:false,
     //主题列表
@@ -152,6 +152,9 @@ Page({
     wx.setNavigationBarColor({
       frontColor: '#ffffff',
       backgroundColor: bcgColor,
+    })
+    wx.setBackgroundColor({
+      backgroundColor:bcgColor
     })
   },
   //处理主题函数

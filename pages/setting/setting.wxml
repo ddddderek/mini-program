@@ -52,7 +52,7 @@
     <view class="funcArea">
       <view class="left">
         <text>设置屏幕亮度</text>
-        <slider value='{{screenBrightness}}' min='0' max='100' step='1' block-size='12' block-color='#40a7e7' activeColor='#40a7e7' show-value='true' bindchanging='handleScreenBrightnessChanging'></slider>
+        <slider value='{{screenBrightness}}' min='0' max='100' step='1' block-size='12' block-color='#40a7e7' activeColor='#40a7e7' show-value='true' bindchange="handleScreenBrightnessChanging" bindchanging='handleScreenBrightnessChanging'></slider>
       </view>
     </view>
     <view class="funcArea">

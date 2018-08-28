@@ -14,8 +14,31 @@ Page({
     ],
   },
   onLoad () {
-    this.initSwiper()
+    this.handleInitSwiper()
   },
+  //动态计算高度
+  setSwiperHeight(res) {
+    //以375为标准动态设置容器高度
+    this.setData({
+      swiperHeight: `${(res.windowWidth || res.screenWidth) / 375 * 200}px`
+    })
+  },
+  //初始化swiper
+  handleInitSwiper() {
+    let _this = this
+    let systeminfo = globalData.systeminfo
+    let len = Object.keys(systeminfo).length
+    if (!len || len == 0) {
+      wx.getSystemInfo({
+        success: function (res) {
+          _this.setSwiperHeight(res)
+        },
+      })
+    } else {
+      _this.setSwiperHeight(systeminfo)
+    }
+  },
+  //查看照片大图
   handlePreview (e) {
     let index = e.currentTarget.dataset.index || 0
     let urls = this.data.bannerImgList
@@ -27,25 +50,7 @@ Page({
       }
     })
   },
-  initSwiper () {
-    let _this = this
-    let systeminfo = globalData.systeminfo
-    let len = Object.keys(systeminfo).length
-    if (len && len != 0){
-      wx.getSystemInfo({
-        success: function (res) {
-          _this.setSwiperHeight(res)
-        },
-      })
-    }else{
-      _this.setSwiperHeight(systeminfo)
-    }
-  },
-  setSwiperHeight (res) {
-    this.setData({
-      swiperHeight: `${(res.windowWidth || res.screenWidth) / 375 * 200}px`
-    })
-  },
+  //赋值联系信息函数
   handleCopyMessage(e) {
     let data = e.currentTarget.dataset
     let title = data.title || ''

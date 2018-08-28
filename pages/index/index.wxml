@@ -1,6 +1,5 @@
-<view class="weatherWrapper">
+<view class="weatherWrapper" style='background: {{bcgColor}}'>
   <image class='bcg' wx:if='{{bcgUrl}}' src='{{bcgUrl}}' mode='aspectFill'></image>
-  <view class="bcg" wx:if='{{!bcgUrl}}' style='background: {{bcgColor}}'></view>
   <view class="searchCityWrapper">
     <view class="searchCityContainer" wx:if="{{!setting.search && !isChosedFlag}}">
       <image src="/img/search.png"></image>
