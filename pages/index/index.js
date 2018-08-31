@@ -32,7 +32,7 @@ Page({
       },
       {
         src: '/img/2.jpg',
-        navbarColor: '#faea9d'
+        navbarColor: '#2445ae'
       },
       {
         src: '/img/3.jpg',
@@ -40,16 +40,28 @@ Page({
       },
       {
         src: '/img/4.jpg',
-        navbarColor: '#bacbe9'
+        navbarColor: '#ce9168'
       },
       {
         src: '/img/5.jpg',
-        navbarColor: '#2445ae'
+        navbarColor: '#826c42'
       },
       {
         src: '/img/6.jpg',
-        navbarColor: '#fff1ab'
+        navbarColor: '#9f6e71'
       },
+      {
+        src: '/img/7.jpg',
+        navbarColor: '#383b6d'
+      },
+      {
+        src: '/img/8.jpg',
+        navbarColor: '#0e0c1a'
+      },
+      {
+        src: '/img/9.jpg',
+        navbarColor: '#f08b6a'
+      }
     ],
 
     //生活推荐图片
