@@ -37,7 +37,7 @@
     </view>
     <view class='body'>
       <image src='/img/weather.png'></image>
-      <view class='text'>开源作者{{autorName}}</view>
+      <view class='text'>开源作者{{authorName}}</view>
     </view>
     <view class='body'>
       <image src='/img/location_grey.png'></image>

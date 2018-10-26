@@ -1,6 +1,15 @@
 var bmap = require('../../libs/bmap-wx.js'); 
 var moment = require('../../libs/moment.js'); 
 var util = require('../../utils/util.js'); 
+import {
+  HTTP
+} from '../../utils/http.js'
+
+import {
+  themesList
+} from '../../theme/index.js'
+
+const http = new HTTP()
 
 //获取应用实例
 const app = getApp()
@@ -25,44 +34,7 @@ Page({
     //选择主题标志位
     isChosedFlag:false,
     //主题列表
-    bcgImgList: [
-      {
-        src: '/img/1.jpg',
-        navbarColor: '#2467ab'
-      },
-      {
-        src: '/img/2.jpg',
-        navbarColor: '#2445ae'
-      },
-      {
-        src: '/img/3.jpg',
-        navbarColor: '#505050'
-      },
-      {
-        src: '/img/4.jpg',
-        navbarColor: '#ce9168'
-      },
-      {
-        src: '/img/5.jpg',
-        navbarColor: '#826c42'
-      },
-      {
-        src: '/img/6.jpg',
-        navbarColor: '#9f6e71'
-      },
-      {
-        src: '/img/7.jpg',
-        navbarColor: '#383b6d'
-      },
-      {
-        src: '/img/8.jpg',
-        navbarColor: '#0e0c1a'
-      },
-      {
-        src: '/img/9.jpg',
-        navbarColor: '#f08b6a'
-      }
-    ],
+    themesList: [],
 
     //生活推荐图片
     icons: ['/img/clothing.png', '/img/carwashing.png', '/img/pill.png', '/img/running.png', '/img/sun.png'],
@@ -82,45 +54,37 @@ Page({
     animationMain:{},
     animationSettin:{},
     animationCity:{},
-    animationSystem:{}
+    animationSystem:{},
+
+    //授权
+    localtionAuthorized:false
   },
-  onShow: function () {
-    // this.initBcg()
-    //初始化页面构造
-    this.handleInitSetting()
-    //初始化主题
-    this.handleSetBcgImg()
-    //初始化天气数据
-    if (!this.data.isSelectCityBack){
-      this.handleInitData()
-    }else{
-      //从选择城市页面返回
-      //清空标志位
-      this.handleCitySearch(this.data.selectedCityName)
-      this.setData({
-        isSelectCityBack: false,
-        selectedCityName: '',
-      })
-    }
-    //初始化tips
-    this.setData({
-      message: util.tips()
-    })
-  },
-  //页面分享函数
-  onShareAppMessage(res) {
-    return {
-      title: 'derek Weather',
-      success() { },
-      fail(err) {
-        let errMsg = e.errMsg
-        let msg = errMsg.indexOf('cancel') !== -1 ? msg = '取消分享' : '分享失败'
-        wx.showToast({
-          title: msg,
-          icon: 'none'
+  onShow () {
+    this.locationAuthorized()
+      .then(() => {
+        // this.initBcg()
+        //初始化页面构造
+        this.handleInitSetting()
+        //初始化主题
+        this.handleSetBcgImg()
+        //初始化天气数据
+        if (!this.data.isSelectCityBack) {
+          this.handleInitData()
+        } else {
+          //从选择城市页面返回
+          //清空标志位
+          this.handleCitySearch(this.data.selectedCityName)
+          this.setData({
+            isSelectCityBack: false,
+            selectedCityName: '',
+          })
+        }
+        //初始化tips
+        this.setData({
+          message: util.tips(),
+          themesList
         })
-      }
-    }
+      })
   },
   //下拉刷新钩子函数
   onPullDownRefresh() {
@@ -139,7 +103,40 @@ Page({
       }
     }) 
   },
-  //处理页面构造函数
+  //页面分享函数
+  onShareAppMessage(res) {
+    return {
+      title: 'derek Weather',
+      success() { },
+      fail(err) {
+        let errMsg = e.errMsg
+        let msg = errMsg.indexOf('cancel') !== -1 ? msg = '取消分享' : '分享失败'
+        wx.showToast({
+          title: msg,
+          icon: 'none'
+        })
+      }
+    }
+  },
+  locationAuthorized(){
+    return new Promise((resolve,reject) => {
+      wx.getSetting({
+        success: data => {
+          if (data.authSetting['scope.userLocation']) {
+            this.setData({
+              localtionAuthorized: true,
+            })
+          } else {
+            this.setData({
+              localtionAuthorized: false
+            })
+          }
+          resolve()
+        }
+      })
+    })
+  },
+  //处理页面结构函数
   handleInitSetting(cb) {
     let that = this
     wx.getStorage({
@@ -171,11 +168,18 @@ Page({
   },
   //处理主题函数
   handleSetBcgImg(index) {
+    if (!this.data.localtionAuthorized) {
+      wx.setNavigationBarColor({
+        frontColor: '#ffffff',
+        backgroundColor: '#000'
+      })
+      return
+    }
     if (index) {
       this.setData({
         bcgImgIndex: index,
-        bcgUrl: this.data.bcgImgList[index].src,
-        bcgColor: this.data.bcgImgList[index].navbarColor,
+        bcgUrl: this.data.themesList[index].src,
+        bcgColor: this.data.themesList[index].navbarColor,
       })
       this.handleSetNavigationBarColor()
       return
@@ -186,16 +190,16 @@ Page({
         let bcgImgIndex = res.data
         this.setData({
           bcgImgIndex,
-          bcgUrl: this.data.bcgImgList[bcgImgIndex].src,
-          bcgColor: this.data.bcgImgList[bcgImgIndex].navbarColor,
+          bcgUrl: this.data.themesList[bcgImgIndex].src,
+          bcgColor: this.data.themesList[bcgImgIndex].navbarColor,
         })
         this.handleSetNavigationBarColor()
       },
       fail: () => {
         this.setData({
           bcgImgIndex: 0,
-          bcgUrl: this.data.bcgImgList[0].src,
-          bcgColor: this.data.bcgImgList[0].navbarColor,
+          bcgUrl: this.data.themesList[0].src,
+          bcgColor: this.data.themesList[0].navbarColor,
         })
         this.handleSetNavigationBarColor()
       },
@@ -241,18 +245,7 @@ Page({
       
       let errMsg = data.errMsg
       if (data.errMsg && data.errMsg.indexOf('auth deny') != -1){
-        //此时说明是用户拒绝了授权
-        //1.提示打开授权
-        //2.点击后进入权限设置页面
-        wx.showToast({
-          title:'需要开启获取位置权限',
-          icon:'none',
-          success:function(){
-            let timer = setTimeout(()=>{
-              wx.openSetting()
-            },1500) 
-          }
-        })
+        this.localtionAuthorized = false
       }else{
         wx.showToast({
           title: '连接超时，请稍后再试',
@@ -270,61 +263,45 @@ Page({
       success:weatherSuccess,
     })
   },
-  // initBcg(){
-  //   let _this = this
-  //   wx.getSavedFileList({
-  //     success: function (res) {
-  //       if (res.fileList.length > 0) {
-  //         _this.setData({
-  //           bcgUrl: res.fileList[0].filePath
-  //         })
-  //       }else{
-  //         _this.setData({
-  //           bcgUrl: ''
-  //         })
-  //       }
-  //     }
-  //   })
-  // },
   //根据地名查询经纬度
   handleCitySearch(val) {
     let _this = this
     if (val) {
-      wx.request({
-        url: geocoderUrl(val),
-        success: function (res) {
+      http.request({url: geocoderUrl(val)})
+        .then((res)=>{
           let data = res.data
           if (data.status === 0) {
             _this.handleInitData(`${data.result.location.lng},${data.result.location.lat}`)
+            _this._initSearchVar()
             //成功
           } else {
-            wx.showToast({
-              title: data.msg || '网络不给力，请稍后再试',
-              icon: 'none',
-            })
+            _this._showErr(data)
           }
-        },
-        fail: function (res) {
-          wx.showToast({
-            title: data.msg || '网络不给力，请稍后再试',
-            icon: 'none',
-          })
-        },
-        complete: function (res) {
-          //初始化
-          //清空搜索数据
-          //页面滚动到顶部
-          _this.setData({
-            searchContext: '',
-          })
-          wx.pageScrollTo({
-            scrollTop: 0,
-            duration: 300
-          })
-        }
-      })
+        }).catch(err=>{
+          _this._showErr(err)
+        })
     }
   },
+  _initSearchVar() {
+    //初始化
+    //清空搜索数据
+    //页面滚动到顶部
+    this.setData({
+      searchContext: '',
+    })
+    wx.pageScrollTo({
+      scrollTop: 0,
+      duration: 300
+    })
+  },
+
+  _showErr(data){
+    wx.showToast({
+      title: data.msg || '网络不给力，请稍后再试',
+      icon: 'none',
+    })
+  },
+
   //搜索城市确认钩子函数
   handleCommit(ev){
     let tarCityName = ev.detail.value.trim()

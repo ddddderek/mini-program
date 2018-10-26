@@ -1,19 +1,29 @@
 const app = getApp()
 const globalData = app.globalData
-// let utils = require('../../utils/utils')
+import {
+  config
+} from '../../config/index.js'
 Page({
   data: {
-    github: 'https://github.com/ddddderek',
-    email: '18842613507@163.com',
-    qq: '13928244',
-    autorName:'myvin',
-    articleAdress:'https://juejin.im/post/5b39bbcc5188252ce018c745',
+    github: '',
+    email: '',
+    qq: '',
+    authorName:'',
+    articleAdress:'',
     swiperHeight: 'auto',
-    bannerImgList: [
-      'https://raw.githubusercontent.com/myvin/miniprogram/master/quietweather/images/logo.png',  'https://raw.githubusercontent.com/myvin/miniprogram/master/quietweather/images/miniqrcode.jpg',
-    ],
+    bannerImgList: [],
   },
   onLoad () {
+    //初始化变量
+    this.setData({
+      github: config.github,
+      email: config.email,
+      qq: config.qq,
+      authorName: config.authorName,
+      articleAdress: config.articleAdress,
+      bannerImgList: config.bannerImgList,
+    }) 
+    console.log(this.data)
     this.handleInitSwiper()
   },
   //动态计算高度

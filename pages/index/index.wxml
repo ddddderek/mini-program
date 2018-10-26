@@ -1,7 +1,7 @@
 <view class="weatherWrapper" style='background: {{bcgColor}}'>
   <image class='bcg' wx:if='{{bcgUrl}}' src='{{bcgUrl}}' mode='aspectFill'></image>
-  <view class="searchCityWrapper">
-    <view class="searchCityContainer" wx:if="{{!setting.search && !isChosedFlag}}">
+  <view class="searchCityWrapper" wx:if="{{!setting.search && !isChosedFlag}}">
+    <view class="searchCityContainer">
       <image src="/img/search.png"></image>
       <input value="{{searchContext}}" placeholder-class="searchPlaceholderStyle" placeholder="查询其他城市" confirm-type="search" maxlength='20' bindconfirm="handleCommit"/>
     </view>   
@@ -57,7 +57,7 @@
     <view class='top'>
       <view class='title'>更换背景</view>
       <view class='bcgs'>
-        <view class='border {{bcgImgIndex === index ? "active" : ""}}' wx:for='{{bcgImgList}}' wx:key='{{index}}'>
+        <view class='border {{bcgImgIndex === index ? "active" : ""}}' wx:for='{{themesList}}' wx:key='{{index}}'>
           <image src='{{item.src}}' catchtap='handleChooseBcg' data-index='{{index}}' data-src='{{item.src}}'></image>
         </view>
       </view>
@@ -65,5 +65,10 @@
     <view class='close' catchtap='handleChangeBcgImgArea' data-show="{{false}}">
       <image src='/img/up-arrow.png'></image>
     </view>
+  </view>
+  <view wx:if='{{!localtionAuthorized}}' class='openSettingButton'>
+      <v-button class="share-btn" open-type="openSetting">
+        <image class="share" slot="img" src="../../img/unlock.png" style="width:100px;height:100px"></image>
+      </v-button>
   </view>
 </view>

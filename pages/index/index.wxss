@@ -251,3 +251,21 @@
   width: 64rpx;
   height: 64rpx;
 }
+
+/* 打开设置页面 button */
+.openSettingButton {
+  position: fixed;
+  z-index: 102;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, .5);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
