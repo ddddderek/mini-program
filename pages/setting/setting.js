@@ -1,16 +1,22 @@
+import {
+  Storage
+} from '../../utils/storage.js'
+
+const storage = new Storage()
+
 const app = getApp()
 const globalData = app.globalData
 Page({
   data: {
-    //页面配置项目
+    /*************页面配置**************/
     setting:{},
     enableUpdate: true,
     screenBrightness: '获取中',
     keepscreenon: false,
     SDKVersion:''
   },
-  onShow: function () { 
-    let _this = this
+
+  onShow () { 
     //初始化强制更新
     this.isForceUpdate()
     //初始化屏幕亮度
@@ -18,24 +24,24 @@ Page({
     //初始化屏幕是否保持常亮
     this.setData({
       keepscreenon: globalData.keepscreenon,
-    }) 
-    wx.getStorage({
-      key: 'setting',
-      success: function (res) {
+    })
+
+    storage.getDataByKey('setting', true)
+      .then(res => {
         let setting = res.data
-        _this.setData({
+        this.setData({
           setting,
         })
-      },
-      fail: function (res) {
-        _this.setData({
+      }).catch(err => {
+        //如果缓存没有数据,那么刷新当前定位地点天气数据
+        this.setData({
           setting: {},
         })
-      },
-    })
+      })
   },
+
   //强制更新判断函数
-  isForceUpdate() {
+  isForceUpdate () {
     let SDKVersion = globalData.systeminfo.SDKVersion
     SDKVersion = SDKVersion.replace(/\./g, '')
     if (parseInt(SDKVersion) >= 190) {
@@ -50,8 +56,9 @@ Page({
       })
     }
   },
+
   //获取屏幕亮度
-  handleGetScreenBrightness() {
+  handleGetScreenBrightness () {
     let that = this
     wx.getScreenBrightness({
       success: function (res) {
@@ -66,8 +73,9 @@ Page({
       },
     })
   },
+
   //switch组件change事件
-  handleSwitchChange(e){
+  handleSwitchChange (e){
     let flag = e.target.dataset.param
     let value = e.detail.value
     let setting = this.data.setting
@@ -91,13 +99,14 @@ Page({
     this.setData({
       setting,
     })
-    wx.setStorage({
+    storage.setDataByKey({
       key: 'setting',
       data: setting,
     })
   },
+
   //是否支持NFC功能
-  handleGetHCEState(){
+  handleGetHCEState (){
     wx.showLoading({
       title:'正在检测...'
     })
@@ -125,8 +134,9 @@ Page({
       }
     })
   },
+
   //调节屏幕亮度函数
-  handleScreenBrightnessChanging(e){
+  handleScreenBrightnessChanging (e) {
     let val = e.detail.value
     console.log(val)
     wx.setScreenBrightness({
@@ -138,8 +148,9 @@ Page({
       },
     })
   },
+
   //是否保持屏幕常亮
-  setKeepScreenOn(value) {
+  setKeepScreenOn (value) {
     let that = this
     wx.setKeepScreenOn({
       keepScreenOn: value,
@@ -150,70 +161,11 @@ Page({
       },
     })
   },
+
   //跳转系统信息页面函数
-  handleGetsysteminfo() {
+  handleGetsysteminfo () {
     wx.navigateTo({
       url: '/pages/systeminfo/systeminfo',
     })
   },
-  // //选择背景图
-  // handleChangeBcg(e) {
-  //   let _this = this
-  //   wx.chooseImage({
-  //     count: 1,
-  //     success(res) {
-  //       _this.handleClearBcgs(() => {
-  //         wx.saveFile({
-  //           tempFilePath: res.tempFilePaths[0],
-  //           success: function () {
-  //             wx.navigateBack({})
-  //           }
-  //         })
-  //       })
-  //     }
-  //   })
-  // },
-  // //清楚背景
-  // handleRecoverBcg(e) {
-  //   this.handleClearBcgs(() => {
-  //     wx.showToast({
-  //       title: '恢复默认背景成功',
-  //       icon: 'none'
-  //     })
-  //     setTimeout(() => {
-  //       wx.navigateBack({})
-  //     }, 1000)
-  //   })
-  // },
-  // //处理本地缓存照片
-  // handleClearBcgs(callback) {
-  //   wx.getSavedFileList({
-  //     success(res) {
-  //       let files = res.fileList
-  //       let len = files.length
-  //       if (len && len != 0) {
-  //         //需要清除
-  //         for (let i = 0; i < len; i++) {
-  //           wx.removeSavedFile({
-  //             filePath: files[i].filePath,
-  //             complete() {
-  //               if (i === len - 1) {
-  //                 callback()
-  //               }
-  //             }
-  //           })
-  //         }
-  //       } else {
-  //         //直接处理本次
-  //         callback()
-  //       }
-  //     },
-  //     fail: function () {
-  //       wx.showToast({
-  //         title: '出错了,请稍后再试',
-  //         icon: 'none',
-  //       })
-  //     },
-  //   })
-  // },
 })

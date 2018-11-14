@@ -22,6 +22,7 @@ Component({
    */
   methods: {
     onGetUserInfo(e){
+      console.log(e)
       this.triggerEvent('getLocation',e.detail,{})
     }
   }

@@ -2,7 +2,7 @@ const app = getApp()
 const globalData = app.globalData
 import {
   config
-} from '../../config/index.js'
+} from '../../utils/util.js'
 Page({
   data: {
     github: '',
@@ -13,6 +13,7 @@ Page({
     swiperHeight: 'auto',
     bannerImgList: [],
   },
+
   onLoad () {
     //初始化变量
     this.setData({
@@ -23,18 +24,18 @@ Page({
       articleAdress: config.articleAdress,
       bannerImgList: config.bannerImgList,
     }) 
-    console.log(this.data)
     this.handleInitSwiper()
   },
+
   //动态计算高度
-  setSwiperHeight(res) {
+  setSwiperHeight (res) {
     //以375为标准动态设置容器高度
     this.setData({
       swiperHeight: `${(res.windowWidth || res.screenWidth) / 375 * 200}px`
     })
   },
   //初始化swiper
-  handleInitSwiper() {
+  handleInitSwiper () {
     let _this = this
     let systeminfo = globalData.systeminfo
     let len = Object.keys(systeminfo).length
@@ -61,7 +62,7 @@ Page({
     })
   },
   //赋值联系信息函数
-  handleCopyMessage(e) {
+  handleCopyMessage (e) {
     let data = e.currentTarget.dataset
     let title = data.title || ''
     let content = data.content || ''

@@ -51,7 +51,7 @@
   <view class='attention contentWrapper'>
     <view class='title'>注意事项</view>
     <view>
-      <view class='text'>本程序的迭代开发,只用做个人学习使用且已征得作者同意(设计思路和UI归作者本人所有)</view>
+      <view class='text'>本程序的迭代开发,只用做个人学习使用且已征得作者同意</view>
       <view class='text'>本程序的数据均存储在本地,没有账号体系,没有数据同步功能,若清空微信相关数据可能会造成数据丢失</view>
     </view>
   </view>

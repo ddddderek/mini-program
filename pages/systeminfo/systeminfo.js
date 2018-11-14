@@ -3,7 +3,11 @@ const globalData = app.globalData
 
 Page({
   data: {
+    /***************设备数据****************/
+    //设备信息
     systeminfoObj: {},
+
+    //设备map
     systeminfoArr: [
       {
         key: 'brand',
@@ -63,6 +67,7 @@ Page({
       },
     ],
   },
+  
   onShow () {
     this.setData({
       systeminfoObj: globalData.systeminfo

@@ -6,10 +6,16 @@ import {
 } from '../../utils/http.js'
 
 import {
-  themesList
+  Storage
+} from '../../utils/storage.js'
+
+import {
+  themesList,
+  icons
 } from '../../theme/index.js'
 
 const http = new HTTP()
+const storage = new Storage()
 
 //获取应用实例
 const app = getApp()
@@ -17,97 +23,84 @@ const globalData = app.globalData
 const geocoderUrl = app.geocoderUrl
 Page({
   data: {
-    //页面配置
-    setting:{},
+    /*************天气相关数据**************/
+    weatherData: {},
 
-    //搜索区域
+    /***************页面配置****************/
+    setting: {},
+
+    /***************搜索区域****************/
     //是否显示
     isShowSearchArea: false,
     //当前搜索城市-input占位
     searchContext: '',
 
-    //背景
+    /***************背景区域****************/
     //图片地址
-    bcgUrl:'/img/1.jpg',
+    bcgUrl: '/img/1.jpg',
     //颜色
     bcgColor: '#2467ab',
     //选择主题标志位
-    isChosedFlag:false,
+    isChosedFlag: false,
     //主题列表
     themesList: [],
 
-    //生活推荐图片
-    icons: ['/img/clothing.png', '/img/carwashing.png', '/img/pill.png', '/img/running.png', '/img/sun.png'],
+    /***************生活推荐****************/
+    icons: [],
 
+    /***************页面堆栈****************/
     //是否是从选择城市页面回来，
-    isSelectCityBack:false,
+    isSelectCityBack: false,
     //选择城市页面选择的城市名称
-    selectedCityName:'',
+    selectedCityName: '',
 
-    //天气相关数据
-    weatherData:{},
-
-    //动画
+    /***************动画区域****************/
     //标志位
     hasStep:true,
     //动画对象
-    animationMain:{},
-    animationSettin:{},
-    animationCity:{},
-    animationSystem:{},
+    animationMain: {},
+    animationSettin: {},
+    animationCity: {},
+    animationSystem: {},
 
-    //授权
-    localtionAuthorized:false
+    /***************页面授权****************/
+    localtionAuthorized: false
   },
   onShow () {
+    //初始化tips,themeList
+    this.setData({
+      message: util.tips(),
+      themesList,
+      icons
+    })
     this.locationAuthorized()
       .then(() => {
-        // this.initBcg()
         //初始化页面构造
         this.handleInitSetting()
         //初始化主题
         this.handleSetBcgImg()
         //初始化天气数据
-        if (!this.data.isSelectCityBack) {
-          this.handleInitData()
-        } else {
-          //从选择城市页面返回
-          //清空标志位
-          this.handleCitySearch(this.data.selectedCityName)
-          this.setData({
-            isSelectCityBack: false,
-            selectedCityName: '',
-          })
-        }
-        //初始化tips
-        this.setData({
-          message: util.tips(),
-          themesList
-        })
+        !this.data.isSelectCityBack ? this.handleInitData({}) : this.handleCitySearch(this.data.selectedCityName)
       })
   },
+
   //下拉刷新钩子函数
-  onPullDownRefresh() {
-    let _this = this
-    wx.getStorage({
-      key:'location',
-      success: function (res) {
-        let location = res.data
-        _this.handleInitData(location)
-      },
-      fail:function (res) {
-          wx.showToast({
-            title: '拉取缓存失败,请再次刷新',
-            icon: 'none'
-          })
-      }
-    }) 
+  onPullDownRefresh () {
+    storage.getDataByKey('location',true)
+      .then(res=>{
+        //如果缓存有数据,那么刷新缓存中地点的天气数据
+        this.handleInitData({ location: res.data, refresh: true })
+      }).catch(err=>{
+        //如果缓存没有数据,那么刷新当前定位地点天气数据
+        this.handleInitData({refresh: true })
+      })
   },
+
   //页面分享函数
-  onShareAppMessage(res) {
+  onShareAppMessage (res) {
     return {
       title: 'derek Weather',
-      success() { },
+      success() {},
       fail(err) {
         let errMsg = e.errMsg
         let msg = errMsg.indexOf('cancel') !== -1 ? msg = '取消分享' : '分享失败'
@@ -118,8 +111,98 @@ Page({
       }
     }
   },
-  locationAuthorized(){
-    return new Promise((resolve,reject) => {
+
+  //处理页面结构函数
+  handleInitSetting () {
+    storage.getDataByKey('setting',true)
+      .then((res)=>{
+        let setting = res.data
+        this.setData({
+          setting,
+        })
+      }).catch(err=>{
+        this.setData({
+          setting: {},
+        })
+      })
+  },
+
+  //设置导航栏背景色
+  handleSetNavigationBarColor (color) {
+    let bcgColor = color || this.data.bcgColor
+    wx.setNavigationBarColor({
+      frontColor: '#ffffff',
+      backgroundColor: bcgColor,
+    })
+    wx.setBackgroundColor({
+      backgroundColor:bcgColor
+    })
+  },
+
+  //处理主题函数
+  handleSetBcgImg (index) {
+    if (!this.data.localtionAuthorized) {
+      //没有进行授权
+      wx.setNavigationBarColor({
+        frontColor: '#ffffff',
+        backgroundColor: '#000'
+      })
+      return
+    }
+    if (index) {
+      //选择主题
+      this.setData({
+        bcgImgIndex: index,
+        bcgUrl: this.data.themesList[index].src,
+        bcgColor: this.data.themesList[index].navbarColor,
+      })
+      this.handleSetNavigationBarColor()
+      return
+    }
+
+    //初始化
+    storage.getDataByKey('bcgImgIndex', true)
+      .then((res)=>{
+        let bcgImgIndex = res.data
+        this.setData({
+          bcgImgIndex,
+          bcgUrl: this.data.themesList[bcgImgIndex].src,
+          bcgColor: this.data.themesList[bcgImgIndex].navbarColor,
+        })
+        this.handleSetNavigationBarColor()
+      }).catch(err=>{
+        this.setData({
+          bcgImgIndex: 0,
+          bcgUrl: this.data.themesList[0].src,
+          bcgColor: this.data.themesList[0].navbarColor,
+        })
+        this.handleSetNavigationBarColor()
+      })
+  },
+
+  //切换主题按钮函数
+  handleChooseBcg (e) {
+    let data = e.currentTarget.dataset
+    let src = data.src
+    let index = data.index
+    storage.setDataByKey({
+      key: 'bcgImgIndex',
+      data: index,
+    })
+    this.handleSetBcgImg(index)
+  },
+
+  //主题更换控制函数
+  handleChangeBcgImgArea (e) {
+    let flag = e.currentTarget.dataset.show
+    this.setData({
+      isChosedFlag: flag,
+    })
+  },
+
+  //验证是否授权地理位置
+  locationAuthorized () {
+    return new Promise((resolve, reject) => {
       wx.getSetting({
         success: data => {
           if (data.authSetting['scope.userLocation']) {
@@ -136,158 +219,83 @@ Page({
       })
     })
   },
-  //处理页面结构函数
-  handleInitSetting(cb) {
-    let that = this
-    wx.getStorage({
-      key: 'setting',
-      success: function (res) {
-        let setting = res.data
-        that.setData({
-          setting,
-        })
-        cb && cb(setting)
-      },
-      fail: function () {
-        that.setData({
-          setting: {},
-        })
-      },
-    })
-  },
-  //设置导航栏背景色
-  handleSetNavigationBarColor(color) {
-    let bcgColor = color || this.data.bcgColor
-    wx.setNavigationBarColor({
-      frontColor: '#ffffff',
-      backgroundColor: bcgColor,
-    })
-    wx.setBackgroundColor({
-      backgroundColor:bcgColor
-    })
-  },
-  //处理主题函数
-  handleSetBcgImg(index) {
-    if (!this.data.localtionAuthorized) {
-      wx.setNavigationBarColor({
-        frontColor: '#ffffff',
-        backgroundColor: '#000'
-      })
-      return
-    }
-    if (index) {
-      this.setData({
-        bcgImgIndex: index,
-        bcgUrl: this.data.themesList[index].src,
-        bcgColor: this.data.themesList[index].navbarColor,
-      })
-      this.handleSetNavigationBarColor()
-      return
-    }
-    wx.getStorage({
-      key: 'bcgImgIndex',
-      success: (res) => {
-        let bcgImgIndex = res.data
-        this.setData({
-          bcgImgIndex,
-          bcgUrl: this.data.themesList[bcgImgIndex].src,
-          bcgColor: this.data.themesList[bcgImgIndex].navbarColor,
-        })
-        this.handleSetNavigationBarColor()
-      },
-      fail: () => {
-        this.setData({
-          bcgImgIndex: 0,
-          bcgUrl: this.data.themesList[0].src,
-          bcgColor: this.data.themesList[0].navbarColor,
-        })
-        this.handleSetNavigationBarColor()
-      },
-    })
-  },
-  //切换注意按钮函数
-  handleChooseBcg(e) {
-    let data = e.currentTarget.dataset
-    let src = data.src
-    let index = data.index
-    wx.setStorage({
-      key: 'bcgImgIndex',
-      data: index,
-    })
-    this.handleSetBcgImg(index)
-  },
-  //处理天气数据函数
-  handleInitData(location){
-    let _this = this
-    let weatherSuccess = function(data) {
-      wx.stopPullDownRefresh()
-      let now = Date.now()
-      data.now = moment(now).format('MM-DD hh:mm')
-      data.curCity = data.currentWeather[0].currentCity
-      data.curTemperature = data.currentWeather[0].date.substr(-4, 2)
-      data.weatherDesc = data.currentWeather[0].weatherDesc
-      data.pm25 = util.pm25Standard(data.currentWeather[0].pm25)
-      _this.setData({
-        weatherData: data
-      })
-      wx.setStorage({
-        key: 'weatherData',
-        data: data,
-      })
-      wx.setStorage({
-        key: 'location',
-        data: location,
-      })
-    }
 
-    let weatherFail = function(data) {
-      wx.stopPullDownRefresh()
-      
-      let errMsg = data.errMsg
-      if (data.errMsg && data.errMsg.indexOf('auth deny') != -1){
-        this.localtionAuthorized = false
-      }else{
-        wx.showToast({
-          title: '连接超时，请稍后再试',
-          icon: 'none',
+  //处理天气数据函数
+  handleInitData ({location, refresh = false}) {
+    //停止下拉刷新
+    wx.stopPullDownRefresh()
+    //如果不是搜索、下拉刷新那么直接用缓存数据
+    if (!refresh) {
+      //如果不能取出来,那么是从非城市选择页面回退
+      storage.getDataByKey('weatherData',true)
+        .then(res=>{
+          this.setData({
+            weatherData: res.data
+          })
+        }).catch(err=>{
+          //如果没有取出来,那么是第一次进入页面
+          this.getWeather(location)
         })
-      }
+    } else {
+      this.getWeather(location)
     }
+  },
+  //刷新、获取天气数据
+  getWeather (location) {
     let BMap = new bmap.BMapWX({
       ak: globalData.ak
     })
 
     BMap.weather({
       location: location,
-      fail: weatherFail,
-      success:weatherSuccess,
+      fail: (data) => {
+        let errMsg = data.errMsg
+        if (data.errMsg && data.errMsg.indexOf('auth deny') != -1) {
+          this.localtionAuthorized = false
+        } else {
+          wx.showToast({
+            title: '连接超时，请稍后再试',
+            icon: 'none',
+          })
+        }
+      },
+      success: (data) => {
+        //格式化天气数据
+        let now = Date.now()
+        data.now = moment(now).format('MM-DD hh:mm')
+        data.curCity = data.currentWeather[0].currentCity
+        data.curTemperature = data.currentWeather[0].date.substr(-4, 2)
+        data.weatherDesc = data.currentWeather[0].weatherDesc
+        data.pm25 = util.pm25Standard(data.currentWeather[0].pm25)
+        this.setData({
+          weatherData: data
+        })
+
+        //存入缓存
+        storage.setDataByKey({
+          key: 'weatherData',
+          data: data,
+        })
+
+        if (location) {
+          storage.setDataByKey({
+            key: 'location',
+            data: location,
+          })
+        }
+      },
     })
   },
-  //根据地名查询经纬度
-  handleCitySearch(val) {
-    let _this = this
-    if (val) {
-      http.request({url: geocoderUrl(val)})
-        .then((res)=>{
-          let data = res.data
-          if (data.status === 0) {
-            _this.handleInitData(`${data.result.location.lng},${data.result.location.lat}`)
-            _this._initSearchVar()
-            //成功
-          } else {
-            _this._showErr(data)
-          }
-        }).catch(err=>{
-          _this._showErr(err)
-        })
-    }
-  },
-  _initSearchVar() {
+
+  //初始化是搜索区域参数和标志位
+  initSearchVar () {
     //初始化
     //清空搜索数据
     //页面滚动到顶部
     this.setData({
       searchContext: '',
+      isSelectCityBack: false,
+      selectedCityName: '',
     })
     wx.pageScrollTo({
       scrollTop: 0,
@@ -295,19 +303,33 @@ Page({
     })
   },
 
-  _showErr(data){
-    wx.showToast({
-      title: data.msg || '网络不给力，请稍后再试',
-      icon: 'none',
-    })
+  //根据地名查询经纬度
+  handleCitySearch (val) {
+    if (val) {
+      http.request({url: geocoderUrl(val)})
+        .then((res)=>{
+          let data = res.data
+          if (data.status === 0) {
+            this.handleInitData({location: `${data.result.location.lng},${data.result.location.lat}`,refresh:true})
+            this.initSearchVar()
+            //成功
+          } else {
+            this.showErr(data)
+          }
+        }).catch(err=>{
+          this.showErr(err)
+        })
+    }
   },
 
   //搜索城市确认钩子函数
-  handleCommit(ev){
+  handleCommit (ev) {
     let tarCityName = ev.detail.value.trim()
     this.handleCitySearch(tarCityName)
   },
-  handleAnimateOn() {
+
+  //菜单动画-展开
+  handleAnimateOn () {
     let animationMain = wx.createAnimation({
       duration: 200,
       timingFunction: 'ease-in-out'
@@ -339,8 +361,8 @@ Page({
     })
   },
 
-  //动画函数
-  handleAnimateOff() {
+  //菜单动画-闭合
+  handleAnimateOff () {
     let animationMain = wx.createAnimation({
       duration: 200,
       timingFunction: 'ease-in-out'
@@ -371,18 +393,14 @@ Page({
       hasStep: true
     })
   },
-  handleChangeBcgImgArea(e) {
-    let flag = e.currentTarget.dataset.show
-    this.setData({
-      isChosedFlag: flag,
-    })
-  },
+  
   //点击主菜单钩子函数
-  handleMainMenu(e){
+  handleMainMenu (e) {
     this.data.hasStep ? this.handleAnimateOn() : this.handleAnimateOff()
   },
+
   //点击子菜单钩子函数
-  handleSecMenu(e){
+  handleSecMenu (e) {
     let flag = e.target.dataset.param
     let url = flag === 1 ? '/pages/cities/cities' : (flag === 2 ? '/pages/setting/setting' :'/pages/about/about') 
       wx.navigateTo({
@@ -390,5 +408,13 @@ Page({
       })
     //关闭动画
     this.handleAnimateOff()
+  },
+
+  //错误处理函数
+  showErr(data) {
+    wx.showToast({
+      title: data.msg || '网络不给力，请稍后再试',
+      icon: 'none',
+    })
   },
 })
