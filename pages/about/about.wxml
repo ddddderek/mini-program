@@ -1,5 +1,5 @@
 <view class='aboutWrapper'>
-  <swiper indicator-color='#666666' indicator-active-color='#40a7e7' autoplay="true" circular="true" interval="5000" duration="300" previous-margin="0px" next-margin="0px" style='height:{{swiperHeight}}'>
+  <!-- <swiper indicator-color='#666666' indicator-active-color='#40a7e7' autoplay="true" circular="true" interval="5000" duration="300" previous-margin="0px" next-margin="0px" style='height:{{swiperHeight}}'>
     <block wx:for="{{bannerImgList}}" wx:key="{{index}}">
       <swiper-item>
         <view class='swiper_item' data-index='{{index}}' catchtap='handlePreview'>
@@ -8,7 +8,7 @@
         </view>
       </swiper-item>
     </block>
-  </swiper>
+  </swiper> -->
   <view class='feedback contentWrapper'>
     <view class='title'>建议 & 意见反馈</view>
     <view class='body' catchtap='handleCopyMessage' data-title='GitHub' data-content='{{github}}'>

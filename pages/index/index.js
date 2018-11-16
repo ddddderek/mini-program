@@ -80,19 +80,24 @@ Page({
         //初始化主题
         this.handleSetBcgImg()
         //初始化天气数据
-        !this.data.isSelectCityBack ? this.handleInitData({}) : this.handleCitySearch(this.data.selectedCityName)
+        !this.data.isSelectCityBack ? this.isStorage() : this.handleCitySearch(this.data.selectedCityName)
       })
   },
 
   //下拉刷新钩子函数
   onPullDownRefresh () {
-    storage.getDataByKey('location',true)
-      .then(res=>{
+    this.isStorage()
+  },
+
+  //是否从缓存拉取城市信息
+  isStorage () {
+    storage.getDataByKey('location', true)
+      .then(res => {
         //如果缓存有数据,那么刷新缓存中地点的天气数据
-        this.handleInitData({ location: res.data, refresh: true })
-      }).catch(err=>{
+        this.handleInitData(res.data)
+      }).catch(err => {
         //如果缓存没有数据,那么刷新当前定位地点天气数据
-        this.handleInitData({refresh: true })
+        this.handleInitData()
       })
   },
 
@@ -221,24 +226,10 @@ Page({
   },
 
   //处理天气数据函数
-  handleInitData ({location, refresh = false}) {
+  handleInitData (location) {
     //停止下拉刷新
     wx.stopPullDownRefresh()
-    //如果不是搜索、下拉刷新那么直接用缓存数据
-    if (!refresh) {
-      //如果不能取出来,那么是从非城市选择页面回退
-      storage.getDataByKey('weatherData',true)
-        .then(res=>{
-          this.setData({
-            weatherData: res.data
-          })
-        }).catch(err=>{
-          //如果没有取出来,那么是第一次进入页面
-          this.getWeather(location)
-        })
-    } else {
-      this.getWeather(location)
-    }
+    this.getWeather(location)
   },
   //刷新、获取天气数据
   getWeather (location) {
@@ -264,12 +255,15 @@ Page({
         let now = Date.now()
         data.now = moment(now).format('MM-DD hh:mm')
         data.curCity = data.currentWeather[0].currentCity
-        data.curTemperature = data.currentWeather[0].date.substr(-4, 2)
+        data.curTemperature = data.currentWeather[0].date.substring(data.currentWeather[0].date.indexOf('：') + 1, data.currentWeather[0].date.indexOf('℃'))
         data.weatherDesc = data.currentWeather[0].weatherDesc
         data.pm25 = util.pm25Standard(data.currentWeather[0].pm25)
         this.setData({
-          weatherData: data
+          weatherData: data,
+          localtionAuthorized:true
         })
+        
+        this.handleSetBcgImg()
 
         //存入缓存
         storage.setDataByKey({
@@ -310,7 +304,7 @@ Page({
         .then((res)=>{
           let data = res.data
           if (data.status === 0) {
-            this.handleInitData({location: `${data.result.location.lng},${data.result.location.lat}`,refresh:true})
+            this.handleInitData( `${data.result.location.lng},${data.result.location.lat}`)
             this.initSearchVar()
             //成功
           } else {
